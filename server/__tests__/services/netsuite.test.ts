@@ -4,32 +4,29 @@ import { db } from '../../../db';
 
 // Mock the database
 vi.mock('@db', () => {
-  const mockQuery = {
-    apiCredentials: {
-      findFirst: vi.fn()
+  return {
+    db: {
+      query: {
+        apiCredentials: {
+          findFirst: vi.fn()
+        }
+      },
+      insert: vi.fn().mockReturnValue({
+        values: vi.fn().mockReturnValue({
+          onConflictDoUpdate: vi.fn().mockResolvedValue({
+            rowCount: 1
+          })
+        })
+      }),
+      update: vi.fn().mockReturnValue({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue({
+            rowCount: 1
+          })
+        })
+      })
     }
   };
-
-  // Mock values and onConflictDoUpdate for insert
-  const mockValues = vi.fn().mockReturnValue({
-    onConflictDoUpdate: vi.fn().mockResolvedValue({ rowCount: 1 })
-  });
-  
-  // Mock set and where for update
-  const mockWhere = vi.fn().mockResolvedValue({ rowCount: 1 });
-  const mockSet = vi.fn().mockReturnValue({ where: mockWhere });
-
-  const mockDb = {
-    query: mockQuery,
-    insert: vi.fn().mockImplementation(() => ({
-      values: mockValues
-    })),
-    update: vi.fn().mockReturnValue({
-      set: mockSet
-    })
-  };
-
-  return { db: mockDb };
 });
 
 // Clear all instances before each test
