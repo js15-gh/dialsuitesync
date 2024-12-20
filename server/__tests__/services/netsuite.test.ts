@@ -3,17 +3,40 @@ import { NetSuiteService } from '../../services/netsuite';
 import { db } from '../../../db';
 
 // Mock the database
-vi.mock('@db', () => ({
-  db: {
-    query: {
-      apiCredentials: {
-        findFirst: vi.fn()
-      }
-    },
-    insert: vi.fn(),
-    update: vi.fn()
-  }
-}));
+vi.mock('@db', () => {
+  const mockQuery = {
+    apiCredentials: {
+      findFirst: vi.fn()
+    }
+  };
+
+  // Mock values and onConflictDoUpdate for insert
+  const mockValues = vi.fn().mockReturnValue({
+    onConflictDoUpdate: vi.fn().mockResolvedValue({ rowCount: 1 })
+  });
+  
+  // Mock set and where for update
+  const mockWhere = vi.fn().mockResolvedValue({ rowCount: 1 });
+  const mockSet = vi.fn().mockReturnValue({ where: mockWhere });
+
+  const mockDb = {
+    query: mockQuery,
+    insert: vi.fn().mockImplementation(() => ({
+      values: mockValues
+    })),
+    update: vi.fn().mockReturnValue({
+      set: mockSet
+    })
+  };
+
+  return { db: mockDb };
+});
+
+// Clear all instances before each test
+beforeEach(() => {
+  // @ts-ignore - Reset the singleton instance
+  NetSuiteService.instance = undefined;
+});
 
 describe('NetSuiteService', () => {
   beforeEach(() => {
