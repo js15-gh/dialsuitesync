@@ -10,8 +10,16 @@ vi.mock('@db', () => ({
         findFirst: vi.fn()
       }
     },
-    insert: vi.fn(),
-    update: vi.fn()
+    insert: vi.fn().mockReturnValue({
+      values: vi.fn().mockReturnValue({
+        onConflictDoUpdate: vi.fn().mockResolvedValue({ rowCount: 1 })
+      })
+    }),
+    update: vi.fn().mockReturnValue({
+      set: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue({ rowCount: 1 })
+      })
+    })
   }
 }));
 
